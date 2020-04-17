@@ -1,11 +1,12 @@
 {
   "name": "vscode-ng-tooling",
   "displayName": "vscode-ng-tooling",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Opinionated extra angular tooling for vscode.",
   "categories": [
     "Other"
   ],
+  "icon": "images/angular-shield.png",
   "repository": "https://github.com/mrahhal/vscode-ng-tooling",
   "publisher": "mrahhal",
   "main": "./dist/extension.js",
