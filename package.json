@@ -1,0 +1,66 @@
+{
+  "name": "vscode-ng-tooling",
+  "displayName": "vscode-ng-tooling",
+  "version": "0.3.2",
+  "description": "Opinionated extra angular tooling for vscode.",
+  "categories": [
+    "Other"
+  ],
+  "repository": "https://github.com/mrahhal/vscode-ng-tooling",
+  "publisher": "mrahhal",
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "vscode:prepublish": "npm run compile",
+    "watch": "tsc -watch -p ./"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "ngTooling.generate",
+        "title": "Generate index files",
+        "category": "Ng Tooling"
+      },
+      {
+        "command": "ngTooling.scaffold",
+        "title": "Scaffold component folder",
+        "category": "Ng Tooling"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "ngTooling.scaffold",
+          "group": "ngTooling"
+        }
+      ]
+    }
+  },
+  "activationEvents": [
+    "onCommand:ngTooling.generate",
+    "onCommand:ngTooling.scaffold"
+  ],
+  "dependencies": {
+    "case": "^1.6.2",
+    "lodash": "^4.17.15",
+    "typescript": "^3.8.2"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/lodash": "^4.14.149",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.42.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "eslint": "^6.8.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.0.1",
+    "vscode-test": "^1.3.0"
+  },
+  "engines": {
+    "vscode": "^1.42.0"
+  }
+}

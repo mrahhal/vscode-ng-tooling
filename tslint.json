@@ -1,0 +1,16 @@
+{
+  "defaultSeverity": "error",
+  "ignoreDefinitionFiles": false,
+  "rules": {
+    "indent": [true, "spaces", 2],
+    "no-duplicate-variable": true,
+    "no-namespace": [true, "allow-declarations"],
+    "one-variable-per-declaration": [true, "ignore-for-loop"],
+    "quotemark": [true, "single"],
+    "semicolon": [true, "always"],
+    "trailing-comma": [true, {"multiline": "always", "singleline": "never"}],
+    "type-literal-delimiter": true,
+    "variable-name": [true, "allow-leading-underscore"],
+    "whitespace": [true, "check-branch", "check-decl", "check-operator", "check-module"]
+  }
+}
