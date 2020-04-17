@@ -2,6 +2,8 @@
 
 Opinionated extra angular tooling for vscode.
 
+Find it on the [marketplace](https://marketplace.visualstudio.com/items?itemName=mrahhal.vscode-ng-tooling).
+
 ## Motive
 
 Managing importing of declarations and states in angular is a pain to do. This extension finds all modules in the app and creates a "{module}.index.ts" file that properly imports all declarations and states in your app. Which means you only need to import a single declarations/states symbol in the module. Just rerun the generate command whenever you add a new index.
