@@ -9,9 +9,30 @@ import * as vscode from 'vscode';
 
 const readdir = util.promisify(fs.readdir);
 const stat = util.promisify(fs.stat);
+const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const mkdir = util.promisify(fs.mkdir);
 const appendFile = util.promisify(fs.appendFile);
+const exists = util.promisify(fs.exists);
+
+interface Config {
+  svgsPath: string | null;
+  samplesPath: string | null;
+}
+
+let config: Config = {
+  svgsPath: null,
+  samplesPath: null,
+};
+
+async function loadConfig(context: vscode.ExtensionContext) {
+  const rootPath = vscode.workspace.workspaceFolders![0].uri.fsPath;
+  const file = path.join(rootPath, 'vscode-ng-tooling.json');
+  if (await exists(file)) {
+    const content = (await readFile(file)).toString();
+    config = { ...config, ...JSON.parse(content) };
+  }
+}
 
 interface IndexFile {
   path: string;
@@ -86,9 +107,9 @@ class Runner {
     this._progress.report({ increment: 0 });
 
     const operations = [
-      this.generateSvgIndex.bind(this),
+      this.generateSvgsMetadata.bind(this),
       this.generateSamplesMetadata.bind(this),
-      this.generateModuleIndexes.bind(this),
+      this.generateModuleIndexFiles.bind(this),
     ];
 
     for (const operation of operations) {
@@ -103,17 +124,20 @@ class Runner {
     this._progress.report({ message, increment });
   }
 
-  private async generateSvgIndex() {
+  private async generateSvgsMetadata() {
+    if (!config.svgsPath) {
+      return;
+    }
+
     this._reportProgress({ message: 'Svgs' });
 
     let resultText = createNewFileText();
 
     const rootPath = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    const targetRelativeDir = 'src/app/shared/components/svg';
-    const svgPath = path.join(rootPath, targetRelativeDir);
-    const generatedSvgIndexFile = path.join(svgPath, `index.ts`);
-    const generatedSvgInfoFile = path.join(svgPath, `component-map.ts`);
-    const svgWorkspaceFiles = await vscode.workspace.findFiles(`${'src/app/shared/components/svg'}/*.ts`, 'index.ts');
+    const svgsPath = path.join(rootPath, config.svgsPath);
+    const generatedSvgIndexFile = path.join(svgsPath, `index.ts`);
+    const generatedSvgInfoFile = path.join(svgsPath, `component-map.ts`);
+    const svgWorkspaceFiles = await vscode.workspace.findFiles(`${config.svgsPath}/*.ts`, 'index.ts');
 
     let svgFiles: SvgFile[] = [];
     for (const svgWorkspaceFile of svgWorkspaceFiles) {
@@ -182,13 +206,16 @@ class Runner {
   }
 
   private async generateSamplesMetadata() {
+    if (!config.samplesPath) {
+      return;
+    }
+
     this._reportProgress({ message: 'Samples', increment: 25 });
 
     let resultText = createNewFileText();
 
     const rootPath = vscode.workspace.workspaceFolders![0].uri.fsPath;
-    const targetRelativeDir = 'src/app/samples';
-    const samplesPath = path.join(rootPath, targetRelativeDir);
+    const samplesPath = path.join(rootPath, config.samplesPath);
     const generatedSamplesMetadataFile = path.join(samplesPath, `metadata.ts`);
     const files = await readdir(samplesPath);
     const samples: string[] = [];
@@ -212,7 +239,7 @@ class Runner {
     await writeFile(generatedSamplesMetadataFile, resultText);
   }
 
-  private async generateModuleIndexes() {
+  private async generateModuleIndexFiles() {
     this._reportProgress({ message: 'Modules', increment: 25 });
 
     const files = await vscode.workspace.findFiles('**/*.module.ts', '{**/node_modules/**,**/app.module.ts}');
@@ -323,7 +350,9 @@ class Runner {
   }
 }
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  await loadConfig(context);
+
   context.subscriptions.push(vscode.commands.registerCommand(
     'ngTooling.scaffold',
     (uri?: vscode.Uri) => runScaffoldCommand(context, uri)));
