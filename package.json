@@ -10,11 +10,12 @@
   "publisher": "mrahhal",
   "main": "./dist/extension.js",
   "scripts": {
-    "test-compile": "tsc -p ./",
     "vscode:prepublish": "webpack --mode production",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
-    "lint": "tslint \"src/**/*.ts\" --force"
+    "lint": "tslint \"src/**/*.ts\" --force",
+    "test-compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
   },
   "contributes": {
     "commands": [
