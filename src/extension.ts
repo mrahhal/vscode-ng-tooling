@@ -143,10 +143,10 @@ class Runner {
     for (const svgWorkspaceFile of svgWorkspaceFiles) {
       const basename = path.basename(svgWorkspaceFile.fsPath);
       const fileName = basename.substring(0, basename.length - '.ts'.length);
-      const f = await vscode.workspace.openTextDocument(svgWorkspaceFile);
+      const content = (await readFile(svgWorkspaceFile.fsPath)).toString();
       const tsf = ts.createSourceFile(
         svgWorkspaceFile.fsPath,
-        f.getText(),
+        content,
         ts.ScriptTarget.Latest,
       );
       const child = tsf.getChildren()[0];
@@ -263,10 +263,10 @@ class Runner {
       let indexFiles: IndexFile[] = [];
 
       for (const workspaceIndexFile of workspaceIndexFiles) {
-        const f = await vscode.workspace.openTextDocument(workspaceIndexFile);
+        const content = (await readFile(workspaceIndexFile.fsPath)).toString();
         const tsf = ts.createSourceFile(
           workspaceIndexFile.fsPath,
-          f.getText(),
+          content,
           ts.ScriptTarget.Latest,
         );
         const child = tsf.getChildren()[0];
