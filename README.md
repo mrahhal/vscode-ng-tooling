@@ -12,7 +12,7 @@ Opinionated extra angular tooling for vscode.
 
 Add "vscode-ng-tooling.json" file to the root of your project.
 
-```json
+```jsonc
 {
   "indent": "\t", // Optional. Default is two spaces.
   "svgsPath": "src/app/shared/svg", // Optional. Default is null.
