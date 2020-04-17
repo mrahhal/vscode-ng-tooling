@@ -1,20 +1,20 @@
 {
   "name": "vscode-ng-tooling",
   "displayName": "vscode-ng-tooling",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Opinionated extra angular tooling for vscode.",
   "categories": [
     "Other"
   ],
   "repository": "https://github.com/mrahhal/vscode-ng-tooling",
   "publisher": "mrahhal",
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "scripts": {
-    "compile": "tsc -p ./",
-    "lint": "eslint src --ext ts",
-    "pretest": "npm run compile && npm run lint",
-    "vscode:prepublish": "npm run compile",
-    "watch": "tsc -watch -p ./"
+    "test-compile": "tsc -p ./",
+    "vscode:prepublish": "webpack --mode production",
+    "webpack": "webpack --mode development",
+    "webpack-dev": "webpack --mode development --watch",
+    "lint": "tslint \"src/**/*.ts\" --force"
   },
   "contributes": {
     "commands": [
@@ -58,7 +58,10 @@
     "eslint": "^6.8.0",
     "glob": "^7.1.6",
     "mocha": "^7.0.1",
-    "vscode-test": "^1.3.0"
+    "ts-loader": "^7.0.0",
+    "vscode-test": "^1.3.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "engines": {
     "vscode": "^1.42.0"
