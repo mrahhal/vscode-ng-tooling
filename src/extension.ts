@@ -18,11 +18,13 @@ const exists = util.promisify(fs.exists);
 interface Config {
   svgsPath: string | null;
   samplesPath: string | null;
+  indent: string;
 }
 
 let config: Config = {
   svgsPath: null,
   samplesPath: null,
+  indent: '  ',
 };
 
 async function loadConfig(context: vscode.ExtensionContext) {
@@ -175,7 +177,7 @@ class Runner {
     resultText += `${EOL}export const SVG_DECLARATIONS: any[] = [${EOL}`;
     for (const svgFile of svgFiles) {
       for (const svg of svgFile.svgs) {
-        resultText += `\t${svg.name},${EOL}`;
+        resultText += `${config.indent}${svg.name},${EOL}`;
       }
     }
     resultText += `];${EOL}`;
@@ -195,7 +197,7 @@ class Runner {
     for (const svgFile of svgFiles.filter(x => x.fileName !== 'icon')) {
       for (const svg of svgFile.svgs) {
         const name = svg.selector.substring('svg-'.length);
-        resultText += `\t'${name}': ${svg.name},${EOL}`;
+        resultText += `${config.indent}'${name}': ${svg.name},${EOL}`;
       }
     }
     resultText += `};${EOL}`;
@@ -232,7 +234,7 @@ class Runner {
 
     resultText += `export const SAMPLES = [${EOL}`;
     for (const sample of samples) {
-      resultText += `\t{ state: '${sample}', name: '${Case.title(sample)}' },${EOL}`;
+      resultText += `${config.indent}{ state: '${sample}', name: '${Case.title(sample)}' },${EOL}`;
     }
     resultText += `];${EOL}`;
 
@@ -337,7 +339,7 @@ class Runner {
         const destructured = type === 'states' ? '...' : '';
 
         for (const element of elements) {
-          resultText += `\t${destructured}${element.as ?? element.name},${EOL}`;
+          resultText += `${config.indent}${destructured}${element.as ?? element.name},${EOL}`;
         }
 
         resultText += `];${EOL}`;
@@ -406,19 +408,19 @@ async function runScaffoldCommand(context: vscode.ExtensionContext, uri?: vscode
     `import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: '${value}',
-  templateUrl: './${value}.html',
-  styleUrls: ['./${value}.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    'class': '${value}',
-  },
+${config.indent}selector: '${value}',
+${config.indent}templateUrl: './${value}.html',
+${config.indent}styleUrls: ['./${value}.scss'],
+${config.indent}encapsulation: ViewEncapsulation.None,
+${config.indent}changeDetection: ChangeDetectionStrategy.OnPush,
+${config.indent}host: {
+${config.indent}${config.indent}'class': '${value}',
+${config.indent}},
 })
 export class ${Case.pascal(value)}Component implements OnInit {
-  constructor() { }
+${config.indent}constructor() { }
 
-  ngOnInit() { }
+${config.indent}ngOnInit() { }
 }
 `);
 
@@ -426,7 +428,7 @@ export class ${Case.pascal(value)}Component implements OnInit {
     `import { ${Case.pascal(value)}Component } from './${value}.component';
 
 export const ${Case.constant(value)}_DECLARATIONS: any[] = [
-  ${Case.pascal(value)}Component,
+${config.indent}${Case.pascal(value)}Component,
 ];
 `);
 

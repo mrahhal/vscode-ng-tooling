@@ -14,7 +14,8 @@ Add "vscode-ng-tooling.json" file to the root of your project.
 
 ```json
 {
-  "svgsPath": "src/app/shared/svg", // Optional
-  "samplesPath": "src/app/samples" // Optional
+  "indent": "\t", // Optional. Default is two spaces.
+  "svgsPath": "src/app/shared/svg", // Optional. Default is null.
+  "samplesPath": "src/app/samples" // Optional. Default is null.
 }
 ```
