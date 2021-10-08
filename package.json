@@ -1,7 +1,7 @@
 {
   "name": "vscode-ng-tooling",
   "displayName": "vscode-ng-tooling",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Opinionated extra angular tooling for vscode.",
   "categories": [
     "Other"
