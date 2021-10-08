@@ -1,5 +1,6 @@
 .vscode/
 node_modules/
+samples/
 out/
 src/
 .gitignore
