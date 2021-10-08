@@ -19,7 +19,7 @@ Managing importing of declarations and states in angular is a pain to do. This e
 ## Usage
 
 - "Ng Tooling: Generate index files" command: Regenerates all "{module}.index.ts" files and svgs/samples metadata if specified in config.
-- "Scaffold component folder" context menu item on folders: Creates a new component folder with component/html/scss/index files.
+- "Ng Tooling: Scaffold component folder" context menu item on folders: Creates a new component folder with component/html/scss/index files.
 
 ## Config
 
