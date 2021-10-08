@@ -32,3 +32,7 @@ Add "vscode-ng-tooling.json" file to the root of your project.
   "samplesPath": "src/app/samples" // Optional. Default is null.
 }
 ```
+
+## Samples
+
+Samples are in the `samples/` directory.
