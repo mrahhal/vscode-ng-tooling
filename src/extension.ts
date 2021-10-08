@@ -56,6 +56,31 @@ interface SvgFile {
   svgs: { name: string; selector: string }[];
 }
 
+interface ModuleFileContext {
+  file: vscode.Uri;
+  dir: string;
+  relativeDir: string;
+  basename: string;
+  name: string;
+  excludes: ModuleFileContext[];
+}
+
+function getModuleFileContext(moduleFile: vscode.Uri): ModuleFileContext {
+  const dir = path.dirname(moduleFile.fsPath);
+  const relativeDir = vscode.workspace.asRelativePath(dir);
+  const basename = path.basename(moduleFile.fsPath);
+  const name = basename.substring(0, basename.indexOf('.'));
+
+  return {
+    file: moduleFile,
+    dir,
+    relativeDir,
+    basename,
+    name,
+    excludes: [],
+  };
+}
+
 function groupBy<T, TKey>(list: T[], keyGetter: (e: T) => TKey): { key: TKey; list: T[] }[] {
   const map = new Map<any, T[]>();
   list.forEach((item) => {
@@ -244,30 +269,43 @@ class Runner {
   private async generateModuleIndexFiles() {
     this._reportProgress({ message: 'Modules', increment: 25 });
 
-    const files = await vscode.workspace.findFiles('**/*.module.ts', '{**/node_modules/**,**/app.module.ts}');
-    const weight = 50 / files.length;
+    const moduleFiles = await vscode.workspace.findFiles('**/*.module.ts', '{**/node_modules/**,**/app.module.ts}');
+    const weight = 50 / moduleFiles.length;
 
-    for (const moduleFile of files) {
+    const moduleFileContexts = moduleFiles.map(moduleFile => getModuleFileContext(moduleFile));
+
+    // Compute inner excludes
+    for (const moduleFile1 of moduleFileContexts) {
+      for (const moduleFile2 of moduleFileContexts) {
+        if (moduleFile1 == moduleFile2) continue;
+
+        if (moduleFile1.relativeDir.startsWith(moduleFile2.relativeDir)) {
+          // moduleFile1 is nested inside moduleFile2
+          // We'll add moduleFile1 to the excludes of moduleFile2
+          moduleFile2.excludes.push(moduleFile1);
+        }
+      }
+    }
+
+    for (const moduleFileContext of moduleFileContexts) {
       if (this._cancelled) { return; }
 
-      const dir = path.dirname(moduleFile.fsPath);
-      const relativeDir = vscode.workspace.asRelativePath(dir);
-      const basename = path.basename(moduleFile.fsPath);
-      const moduleName = basename.substring(0, basename.indexOf('.'));
+      const { dir, relativeDir, basename, name } = moduleFileContext;
 
-      this._reportProgress({ message: `Modules (${moduleName})`, increment: weight });
+      this._reportProgress({ message: `Modules (${name})`, increment: weight });
 
       let resultText = createNewFileText();
 
-      const workspaceIndexFiles = await vscode.workspace.findFiles(relativeDir + '/**/index.ts');
-      if (!workspaceIndexFiles.length) { continue; }
+      var exclude = '{' + moduleFileContext.excludes.map(c => c.relativeDir + '/**').join(',') + '}';
+      const moduleIndexFiles = await vscode.workspace.findFiles(relativeDir + '/**/index.ts', exclude);
+      if (!moduleIndexFiles.length) { continue; }
 
       let indexFiles: IndexFile[] = [];
 
-      for (const workspaceIndexFile of workspaceIndexFiles) {
-        const content = (await readFile(workspaceIndexFile.fsPath)).toString();
+      for (const moduleIndexFile of moduleIndexFiles) {
+        const content = (await readFile(moduleIndexFile.fsPath)).toString();
         const tsf = ts.createSourceFile(
-          workspaceIndexFile.fsPath,
+          moduleIndexFile.fsPath,
           content,
           ts.ScriptTarget.Latest,
         );
@@ -275,14 +313,14 @@ class Runner {
         const variables = child.getChildren().filter(n => n.kind === ts.SyntaxKind.VariableStatement);
 
         const relativeDir = vscode.workspace.asRelativePath(dir);
-        const path = vscode.workspace.asRelativePath(workspaceIndexFile.fsPath);
+        const path = vscode.workspace.asRelativePath(moduleIndexFile.fsPath);
         let relativePath = vscode.workspace.asRelativePath(path.substring(relativeDir.length + 1, path.length - '/index.ts'.length));
         if (relativePath === '/') {
           relativePath = 'index';
         }
 
         const indexFile: IndexFile = {
-          path: workspaceIndexFile.fsPath,
+          path: moduleIndexFile.fsPath,
           relativePath,
         };
         indexFiles.push(indexFile);
@@ -301,7 +339,7 @@ class Runner {
 
       indexFiles = _.orderBy(indexFiles, x => x.path);
 
-      const generatedIndexFile = path.join(dir, `${moduleName}.index.ts`);
+      const generatedIndexFile = path.join(dir, `${name}.index.ts`);
 
       const symbols: Symbol[] = [];
 
