@@ -7,6 +7,10 @@
 
 ## Publish
 
+We'll use the `vsce` package, so install it once globally:
 - `npm install -g vsce`
-- `vsce package`
-- `vsce publish`
+
+To publish a version:
+- `npm `
+- `vsce package`: Packages this into a vsix
+- `vsce publish`: Publishes the package to store
